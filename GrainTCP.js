@@ -4,7 +4,7 @@ const CFG = {
   upPack: 16 * 1024, upQMax: 256 * 1024, maxED: 8 * 1024, concur: 4
 };  //snippets部署的话，concur不能是4，必须是1 ！！！
 
-const 默认备用小可爱地址 = 'dsl253-007-079.nyc1.dsl.speakeasy.net';  //兜底落地IP，建议改成你自己的
+const 默认备用小可爱地址 = 'usip.vpndns.net';  //兜底落地IP，建议改成你自己的
 const 主连接超时毫秒 = 2000;
 const 备用连接超时毫秒 = 4000;
 const txt缓存生存期ms = 60 * 1000;
