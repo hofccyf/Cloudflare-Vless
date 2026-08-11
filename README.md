@@ -4,7 +4,7 @@
 
 使用xhttp协议需要开启域名的gRPC，节点域名需使用开启了gRPC的自定义域名！
 
-支持workes、pages、snippets部署！
+支持workers、pages、snippets部署！
 
 客户端path支持TXT,格式：/ip=1.1.1.1  ；  /ip=1.com  ;  /ip=1.com/ip.txt  ；  SS协议path路径：/UUID/?ip=1.com
 
