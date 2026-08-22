@@ -3,6 +3,37 @@ const 玉衡令 = "88888888-8888-8888-8888-888888888888";  //揉揉ID，改成�
 const 默认备用小可爱地址 = "usip.vpndns.net";  //兜底落地地址，改成你自己的
 const txt缓存生存期ms = 300 * 1000;
 const txt失败缓存生存期ms = 10 * 1000;
+
+const proxyIpAddrs = {
+    AU: '162.158.168.158', DE: '172.69.151.178', GB: '172.70.161.88', HK: '162.158.178.158',
+    JP: '162.158.119.188', KR: '162.158.138.138', MY: '162.158.26.18', NL: '172.71.99.228',
+    RU: '172.69.8.188', SG: '162.158.88.88', TW: '172.69.221.158', US: '172.69.133.188'
+};
+
+const coloRegions = {
+    JP: new Set(['NRT', 'KIX', 'FUK', 'OKA']),
+    KR: new Set(['ICN']),
+    HK: new Set(['HKG']),
+    TW: new Set(['TPE', 'KHH']),
+    SG: new Set(['SIN']),
+    MY: new Set(['KUL', 'JHB']),
+    AU: new Set(['SYD', 'MEL', 'BNE', 'PER', 'ADL']),
+    US: new Set([
+        'ATL', 'AUS', 'BNA', 'BOS', 'BUF', 'BWI', 'CLE', 'CLT', 'CMH', 'DAL', 'DEN', 'DFW', 'DTW', 'EWR', 'FLL', 'HNL', 'HOU', 'IAD', 'IAH', 'IND', 'JAX', 'LAS', 'LAX', 'MCI', 'MEM', 'MIA', 'MKE', 'MSP', 'ORD', 'PHL', 'PHX', 'PIT', 'RDU', 'SAN', 'SAT', 'SEA', 'SFO', 'SJC', 'SLC', 'STL', 'TPA',
+        'YUL', 'YVR', 'YYC', 'YYZ', 'MEX', 'GDL', 'QRO', 'BOG', 'GRU', 'GIG', 'EZE', 'SCL', 'LIM', 'CCS', 'UIO', 'KIN', 'PTY', 'SJU', 'CUR', 'AUA', 'BON', 'SXM', 'DOM', 'BGI', 'POS', 'PAP', 'SDQ', 'STT', 'STX'
+    ]),
+    DE: new Set([
+        'FRA', 'MUC', 'DUS', 'HAM', 'BER', 'STR', 'LEJ', 'DRS', 'FMM', 'PAD', 'SCN', 'ZRH', 'GVA', 'BRN', 'BSL', 'VIE', 'KLU', 'SZG', 'INN', 'WAW', 'KRK', 'WRO', 'KTW', 'GDN', 'POZ', 'LCJ', 'LUZ', 'SZZ', 'PRG', 'BRQ', 'BUD', 'BTS', 'OTP', 'CLJ', 'SOF', 'BEG', 'ZAG', 'KIV', 'TBS', 'EVN', 'DXB', 'AUH', 'DOH', 'MCT', 'BAH', 'JED', 'RUH', 'KWI', 'AMM', 'BEY', 'BGW', 'CAI', 'ALG', 'TUN', 'JNB', 'CPT', 'DUR', 'PLZ', 'NBO', 'ACC', 'LOS', 'DKR', 'ABV', 'MPM', 'LLW', 'KGL', 'ADD', 'DAR', 'EBB', 'NDOLA', 'OGB'
+    ]),
+    GB: new Set([
+        'LHR', 'MAN', 'EDI', 'GLA', 'BFS', 'BRS', 'CWL', 'LCY', 'LGW', 'LTN', 'STN', 'LPL', 'NCL', 'DUB', 'ORK', 'SNN', 'KEF', 'OSL', 'TRD', 'BGO', 'SVG', 'ARN', 'GOT', 'MMX', 'BMA', 'CPH', 'AAL', 'BLL', 'RNN', 'HEL', 'TMP', 'TKU', 'RIX', 'TLL', 'VNO'
+    ]),
+    NL: new Set([
+        'AMS', 'BRU', 'LIL', 'CRL', 'LUX', 'CDG', 'ORY', 'LYS', 'MRS', 'NCE', 'BOD', 'TLS', 'BIA', 'MAD', 'BCN', 'VLC', 'OPO', 'LIS', 'SCQ', 'PMI', 'MAH', 'IBZ', 'SVQ', 'FCO', 'MXP', 'LIN', 'PMO', 'BRI', 'FLR', 'CIA', 'BLQ', 'NAP', 'CTA', 'ATH', 'SKG', 'MLA'
+    ]),
+    RU: new Set(['DME', 'SVO', 'LED', 'KZN', 'AER', 'UFA', 'ROV', 'KRR', 'OVB', 'VVO', 'TOF'])
+};
+
 const 书解 = new TextDecoder();
 const enc = new TextEncoder();
 const txt缓存池 = new Map();
@@ -59,11 +90,36 @@ function 提取ProxyIP(r) {
   }
   return "";
 }
+
+function 获取反代列表(request) {
+    const list = [];
+    const colo = request.cf?.colo;
+    for (const [region, colos] of Object.entries(coloRegions)) {
+        if (colos.has(colo)) { list.push(proxyIpAddrs[region]); break; }
+    }
+    if (list.length === 0) {
+        const continent = request.cf?.continent;
+        if (continent === 'AS') list.push(proxyIpAddrs.JP);
+        else if (continent === 'EU') list.push(proxyIpAddrs.DE);
+        else if (continent === 'NA' || continent === 'SA') list.push(proxyIpAddrs.US);
+        else if (continent === 'OC') list.push(proxyIpAddrs.AU);
+        else list.push(proxyIpAddrs.US);
+    }
+    list.push(默认备用小可爱地址);
+    return list;
+}
+
 async function connectOnce(h, p) { const s = cfConnect({ hostname: h, port: p }); await s.opened; return s; }
-async function connectToTarget(a, p, c, f) {
+async function connectToTarget(a, p, c, fList) {
   try { return await connectOnce(a, p); } catch (_) {}
   if (c) { try { return await connectOnce(c.hostname, c.port); } catch (_) {} }
-  if (f && f !== c) { try { return await connectOnce(f.hostname, f.port); } catch (_) {} }
+  if (fList && fList.length > 0) {
+    for (const f of fList) {
+      if (f && (!c || f.hostname !== c.hostname)) {
+        try { return await connectOnce(f.hostname, f.port); } catch (_) {}
+      }
+    }
+  }
   return null;
 }
 
@@ -99,12 +155,26 @@ const turnUDP = async (turn, sw) => { let s = null, c = false; const ps = new Se
 
 const 玉衡印 = (() => { const b = new Uint8Array(16), h = 玉衡令.replace(/-/g, ""); for (let i = 0; i < 16; i++) b[i] = parseInt(h.slice(i * 2, i * 2 + 2), 16); return b; })();
 const ipv6ToString = b => { const p = []; for (let i = 0; i < 16; i += 2) p.push(((b[i] << 8) | b[i + 1]).toString(16)); return p.join(":").replace(/:(?:0:)+/, "::"); };
+
 const parseGrainHeader = (buf, hasSSPass) => {
   if (buf.byteLength < 7) return null;
   const proto = buf[0];
   if (proto === 1 && hasSSPass) return { address: `${buf[1]}.${buf[2]}.${buf[3]}.${buf[4]}`, port: (buf[5] << 8) | buf[6], rawPayload: buf.subarray(7), isUDP: false, isVless: false };
   if (proto === 3 && hasSSPass) { const l = buf[1]; if (buf.byteLength < 4 + l) return null; return { address: 书解.decode(buf.subarray(2, 2 + l)), port: (buf[2 + l] << 8) | buf[3 + l], rawPayload: buf.subarray(4 + l), isUDP: false, isVless: false }; }
   if (proto === 4 && hasSSPass) { if (buf.byteLength < 19) return null; const g = []; for (let i = 0; i < 8; i++) g.push(((buf[1 + i * 2] << 8) | buf[2 + i * 2]).toString(16)); return { address: `[${g.join(':')}]`, port: (buf[17] << 8) | buf[18], rawPayload: buf.subarray(19), isUDP: false, isVless: false }; }
+
+  if (buf.byteLength >= 60 && buf[56] === 13 && buf[57] === 10) {
+    const tAddrType = buf[59];
+    let tAddress = '', tOffset = 60;
+    if (tAddrType === 1) { if (buf.byteLength < 66) return null; tAddress = `${buf[60]}.${buf[61]}.${buf[62]}.${buf[63]}`; tOffset = 64; }
+    else if (tAddrType === 3) { if (buf.byteLength < 62) return null; const tLen = buf[60]; if (buf.byteLength < 61 + tLen) return null; tAddress = 书解.decode(buf.subarray(61, 61 + tLen)); tOffset = 61 + tLen; }
+    else if (tAddrType === 4) { if (buf.byteLength < 76) return null; const tIpv6 = []; for (let i = 0; i < 8; i++) tIpv6.push(((buf[60 + i * 2] << 8) | buf[61 + i * 2]).toString(16)); tAddress = `[${tIpv6.join(':')}]`; tOffset = 76; }
+    else return null;
+    if (buf.byteLength < tOffset + 4) return null; // 2字节port + \r\n
+    const tPort = (buf[tOffset] << 8) | buf[tOffset + 1];
+    return { address: tAddress, port: tPort, rawPayload: buf.subarray(tOffset + 4), isUDP: false, isVless: false };
+  }
+
   if (buf.byteLength < 24 || proto !== 0) return null;
   const v = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   let o = 1;
@@ -127,7 +197,7 @@ const parseGrainHeader = (buf, hasSSPass) => {
   return { address: a, port: p, rawPayload: buf.subarray(o), isUDP: false, isVless: true };
 };
 const bridgeTcpToWebSocket = async (r, w, sM) => { const rd = r.getReader({ mode: "byob" }); let b = new ArrayBuffer(65536); try { while (true) { const { done, value } = await rd.read(new Uint8Array(b)); if (done) break; w.send(value); if (sM) b = new ArrayBuffer(65536); else b = value.buffer; } } finally { rd.releaseLock(); } };
-const handleWebSocket = async (ws, ip, req, cP, fP, hasSSPass) => {
+const handleWebSocket = async (ws, ip, req, cP, fList, hasSSPass) => {
   ws.binaryType = "arraybuffer";
   let ts = null, tw = null, est = false, wt = Promise.resolve(), cl = false, uh = null;
   const turn = getTurn(req.url), close = () => { if (cl) return; cl = true; try { uh?.close(); } catch {} try { tw?.releaseLock(); } catch {} try { ts?.close(); } catch {} try { ws.close(); } catch {} };
@@ -141,7 +211,7 @@ const handleWebSocket = async (ws, ip, req, cP, fP, hasSSPass) => {
       if (g.isUDP && turn) { uh = await turnUDP(turn, d => { try { ws.send(d); } catch {} }); if (!uh) return close(); const ud = g.rawPayload; ud.length && uh.processXUDP(ud); return; }
       let sM = false;
       if (turn) { const ip = /^\d+\.\d+\.\d+\.\d+$/.test(g.address) ? g.address : (g.address.includes(':') ? g.address.replace(/^\[|\]$/g, '') : await resolveIP(g.address)); if (!ip) return close(); ts = await turnConn(turn, ip, g.port); }
-      else { sM = g.port === 443 || (g.rawPayload.byteLength > 0 && g.rawPayload[0] === 0x16); ts = await connectToTarget(g.address, g.port, cP, fP); }
+      else { sM = g.port === 443 || (g.rawPayload.byteLength > 0 && g.rawPayload[0] === 0x16); ts = await connectToTarget(g.address, g.port, cP, fList); }
       if (!ts) return close();
       tw = ts.writable.getWriter(); est = true;
       bridgeTcpToWebSocket(ts.readable, ws, sM).finally(close);
@@ -155,12 +225,14 @@ const handleWebSocket = async (ws, ip, req, cP, fP, hasSSPass) => {
 };
 const decodeBase64Url = v => { const n = v.replace(/-/g, "+").replace(/_/g, "/"), r = n.length % 4, b = atob(r ? n + "=".repeat(4 - r) : n), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
 const handleWSLocal = async req => {
-  const rP = 提取ProxyIP(req.url), rPr = rP ? await 获取客户端代理地址(rP) : "", cP = parseProxyip(rPr), fP = parseProxyip(默认备用小可爱地址), hasSSPass = decodeURIComponent(req.url).includes(玉衡令), pH = req.headers.get("sec-websocket-protocol");
+  const rP = 提取ProxyIP(req.url), rPr = rP ? await 获取客户端代理地址(rP) : "", cP = parseProxyip(rPr);
+  const fList = 获取反代列表(req).map(ip => parseProxyip(ip)).filter(Boolean);
+  const hasSSPass = decodeURIComponent(req.url).includes(玉衡令), pH = req.headers.get("sec-websocket-protocol");
   let iPL = null;
   if (pH) { try { iPL = decodeBase64Url(pH); } catch { return new Response("Bad WebSocket protocol.", { status: 400 }); } }
   const pr = new WebSocketPair(), [cW, sW] = Object.values(pr);
   sW.accept();
-  handleWebSocket(sW, iPL, req, cP, fP, hasSSPass);
+  handleWebSocket(sW, iPL, req, cP, fList, hasSSPass);
   return new Response(null, { status: 101, webSocket: cW, headers: pH ? { "Sec-WebSocket-Protocol": pH } : undefined });
 };
 const MAX_VLESS_HEADER_BYTES = 8192, EMPTY_BYTES = new Uint8Array(0), concatBytes = (l, r) => { const m = new Uint8Array(l.byteLength + r.byteLength); m.set(l); m.set(r, l.byteLength); return m; }, matchesUuid = b => { const u = 玉衡令.replace(/-/g, ""); for (let i = 0; i < 16; i++) if (b[i + 1] !== parseInt(u.slice(i * 2, i * 2 + 2), 16)) return false; return true; };
@@ -170,6 +242,19 @@ const parseVlessRequest = (b, hasSSPass) => {
   if (pr === 1 && hasSSPass) return { hostname: `${b[1]}.${b[2]}.${b[3]}.${b[4]}`, port: (b[5] << 8) | b[6], dataOffset: 7, isVless: false };
   if (pr === 3 && hasSSPass) { const l = b[1]; if (b.byteLength < 4 + l) return null; return { hostname: 书解.decode(b.subarray(2, 2 + l)), port: (b[2 + l] << 8) | b[3 + l], dataOffset: 4 + l, isVless: false }; }
   if (pr === 4 && hasSSPass) { if (b.byteLength < 19) return null; const g = []; for (let i = 0; i < 8; i++) g.push(((b[1 + i * 2] << 8) | b[2 + i * 2]).toString(16)); return { hostname: g.join(':'), port: (b[17] << 8) | b[18], dataOffset: 19, isVless: false }; }
+
+  if (b.byteLength >= 60 && b[56] === 13 && b[57] === 10) {
+    const tAddrType = b[59];
+    let tHostname = '', tOffset = 60;
+    if (tAddrType === 1) { if (b.byteLength < 66) return null; tHostname = `${b[60]}.${b[61]}.${b[62]}.${b[63]}`; tOffset = 64; }
+    else if (tAddrType === 3) { if (b.byteLength < 62) return null; const tLen = b[60]; if (b.byteLength < 61 + tLen) return null; tHostname = 书解.decode(b.subarray(61, 61 + tLen)); tOffset = 61 + tLen; }
+    else if (tAddrType === 4) { if (b.byteLength < 76) return null; const tIpv6 = []; for (let i = 0; i < 8; i++) tIpv6.push(((b[60 + i * 2] << 8) | b[61 + i * 2]).toString(16)); tHostname = `[${tIpv6.join(':')}]`; tOffset = 76; }
+    else return null;
+    if (b.byteLength < tOffset + 4) return null;
+    const tPort = (b[tOffset] << 8) | b[tOffset + 1];
+    return { hostname: tHostname, port: tPort, dataOffset: tOffset + 4, isVless: false };
+  }
+
   if (b.byteLength < 18 || pr !== 0) return null;
   if (!matchesUuid(b)) throw new Error("invalid vless uuid");
   const cO = 18 + b[17];
@@ -202,11 +287,13 @@ const readVlessHeader = async (r, hasSSPass) => {
 };
 const handleXhttpLocal = async req => {
   if (!req.body) return new Response("Not Found", { status: 404 });
-  const rP = 提取ProxyIP(req.url), rPr = rP ? await 获取客户端代理地址(rP) : "", cP = parseProxyip(rPr), fP = parseProxyip(默认备用小可爱地址), hasSSPass = decodeURIComponent(req.url).includes(玉衡令);
+  const rP = 提取ProxyIP(req.url), rPr = rP ? await 获取客户端代理地址(rP) : "", cP = parseProxyip(rPr);
+  const fList = 获取反代列表(req).map(ip => parseProxyip(ip)).filter(Boolean);
+  const hasSSPass = decodeURIComponent(req.url).includes(玉衡令);
   let h;
   try { h = await readVlessHeader(req, hasSSPass); } catch { return new Response("bad request", { status: 400 }); }
   let s;
-  try { s = await connectToTarget(h.hostname, h.port, cP, fP); } catch { try { await req.body.cancel(); } catch {} return new Response("bad gateway", { status: 502 }); }
+  try { s = await connectToTarget(h.hostname, h.port, cP, fList); } catch { try { await req.body.cancel(); } catch {} return new Response("bad gateway", { status: 502 }); }
   const ac = new AbortController(); let sC = false;
   const cl = r => { if (!ac.signal.aborted) { try { ac.abort(r); } catch {} } if (!sC) { sC = true; try { s.close(); } catch {} } };
   const uP = (async () => { const w = s.writable.getWriter(); try { if (h.initialPayload.byteLength) await w.write(h.initialPayload); } finally { w.releaseLock(); } await req.body.pipeTo(s.writable, { signal: ac.signal }); })();
@@ -218,6 +305,11 @@ const handleXhttpLocal = async req => {
 
 export default {
   async fetch(req) {
+    // ★ 单脚本门卫：要求路径里必须带 UUID (或者你自定义的密码)
+    if (!decodeURIComponent(req.url).includes(玉衡令)) {
+      return new Response("Forbidden", { status: 403 });
+    }
+
     const isWS = req.headers.get("Upgrade")?.toLowerCase() === "websocket";
     const isX = req.method === "POST" && req.body;
     if (isWS) return await handleWSLocal(req);
