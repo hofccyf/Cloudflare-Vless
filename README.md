@@ -8,7 +8,8 @@
 
 支持跟随优选地址自动匹配落地地址，无需单独配置proxyip，CF官方反代地址可以秒过CF盾
 
-客户端path必须必须必须为：/id=你的UUID，如果需要自定义proxyip，按以下格式填写，支持TXT解码,格式：/id=你的UUID/ip=1.1.1.1  ；  /id=你的UUID/ip=1.com  ;  /id=你的UUID/ip=1.com/ip.txt
+客户端path必须必须必须为：/id=你的UUID，如果需要自定义proxyip，按以下格式填写，支持TXT解码,格式：/id=你的UUID/ip=1.1.1.1  ；  /id=你的UUID/ip=1.com  ;  /id=你的UUID/ip=1.com/ip.txt  ；
+如果使用优选订阅器也可颠倒顺序，例如：/ip=1.1.1.1/id=你的UUID
 
 各协议配置图如下：
 
