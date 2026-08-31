@@ -1,7 +1,8 @@
 import { connect as cfConnect } from "cloudflare:sockets";
-const 玉衡令 = "88888888-8888-8888-8888-888888888888";  //揉揉ID，推荐改成你自己的
-const 落霞 = "usip.vpndns.net";  //兜底反帒，推荐改成你自己的
+const 玉衡令 = "88888888-8888-8888-8888-888888888888";
+const 落霞 = "usip.vpndns.net";
 const 雨霽期 = 3e5, 晦明期 = 1e4;
+const 寫限 = 10_000, 犬巡 = 60_000, 犬判 = 600_000;
 const 通衢 = {
     AU: 'auip.j894d.eu.cc', DE: 'deip.j894d.eu.cc', GB: 'gbip.j894d.eu.cc', HK: 'hkip.j894d.eu.cc',
     JP: 'jpip.j894d.eu.cc', KR: 'krip.j894d.eu.cc', MY: 'myip.j894d.eu.cc', NL: 'nlip.j894d.eu.cc',
@@ -17,7 +18,6 @@ const 星野 = {
     RU:new Set(['DME','SVO','LED','KZN','AER','UFA','ROV','KRR','OVB','VVO','TOF'])
 };
 const 解花 = new TextDecoder(), 篆印 = new TextEncoder(), 雲記 = new Map(), 池書 = new Map(), 地圖 = new Map();
-
 function 析衢(v) {
   if (!v) return null;
   const m = v.match(/^([a-zA-Z0-9.-]+)(?::(\d{1,5}))?$/);
@@ -82,7 +82,7 @@ const 落鎖 = (...a) => a.forEach(x => { try { x?.close?.(); } catch {} });
 const 生辰 = () => crypto.getRandomValues(new Uint8Array(12));
 const 畫符 = (t, v) => { const b = new Uint8Array(4 + v.length + 四象(v.length)), d = new DataView(b.buffer); d.setUint16(0, t); d.setUint16(2, v.length); b.set(v, 4); return b; };
 const 寄書 = (t, id, a) => { const bd = 聚沙(...a), h = new Uint8Array(20), d = new DataView(h.buffer); d.setUint16(0, t); d.setUint16(2, bd.length); h.set(神針, 4); h.set(id, 8); return 聚沙(h, bd); };
-const 展脈 = ip => { ip = ip.replace(/^\[|\]$/g, '').split('%')[0]; if (!ip.includes('::')) return ip.split(':').map(g => g || '0'); const [l, r] = ip.split('::'); const L = l ? l.split(':') : [], R = r ? r.split(':') : []; const m = Math.max(0, 8 - L.length - R.length); return [...L, ...Array(m).fill('0'), ...R]; };
+const 展脈 = ip => { ip = ip.replace(/^\[|\]$/g, '').split('%')[0]; if (!ip.includes('::')) return ip.split(':').map(g => g || '0'); const [l, r] = ip.split('::'); const L = l ? l.split(':') : [], R = r ? r.split(':') : []; const m = Math.max(0, 8 - L.length - R.length); return [...L, ...Array(m).fill('0'),...R]; };
 const 幻影 = (ip, port) => { const v6 = ip.includes(':'), b = new Uint8Array(v6 ? 20 : 8); b[1] = v6 ? 2 : 1; new DataView(b.buffer).setUint16(2, port ^ 0x2112); if (v6) { const x = new Uint8Array(16); x.set(神針); 展脈(ip).forEach((g, i) => { const v = parseInt(g || '0', 16); b[4 + i * 2] = ((v >> 8) ^ x[i * 2]) & 0xff; b[5 + i * 2] = (v & 0xff) ^ x[i * 2 + 1]; }); } else { ip.split('.').forEach((v, i) => b[4 + i] = +v ^ 神針[i]); } return b; };
 const 解符 = d => { if (d.length < 20 || 神針.some((v, i) => d[4 + i] !== v)) return null; const dv = new DataView(d.buffer, d.byteOffset, d.byteLength), ml = dv.getUint16(2), a = {}; for (let o = 20; o + 4 <= 20 + ml;) { const t = dv.getUint16(o), l = dv.getUint16(o + 2); if (o + 4 + l > d.length) break; a[t] = d.slice(o + 4, o + 4 + l); o += 4 + l + 四象(l); } return { type: dv.getUint16(0), attrs: a }; };
 const 辨咎 = d => d?.length >= 4 ? (d[2] & 7) * 100 + d[3] : 0;
@@ -94,32 +94,52 @@ const 五印 = async s => new Uint8Array(await crypto.subtle.digest('MD5', 篆�
 const 覓角 = u => { let U; try { U = decodeURIComponent(u); } catch { return null; } const m = U.match(/\/turn:\/\/([^?\s]*)/i); if (!m) return null; const t = m[1], at = t.lastIndexOf('@'), cr = at >= 0 ? t.slice(0, at) : '', hp = t.slice(at + 1); let h, p; if (hp.startsWith('[')) { const e = hp.indexOf(']'); if (e === -1) return null; h = hp.slice(0, e + 1); p = hp.slice(e + 2); } else { const c = hp.lastIndexOf(':'); h = c >= 0 ? hp.slice(0, c) : hp; p = c >= 0 ? hp.slice(c + 1) : ''; } const P = +p; if (!P || P < 1 || P > 65535) return null; const ci = cr.indexOf(':'); return { host: h, port: P, user: ci >= 0 ? cr.slice(0, ci) : '', pass: ci >= 0 ? cr.slice(ci + 1) : '' }; };
 const 覓角Q = q => { if (!q) return null; const at = q.lastIndexOf('@'), cr = at >= 0 ? q.slice(0, at) : '', hp = at >= 0 ? q.slice(at + 1) : q; const ci = hp.lastIndexOf(':'); if (ci === -1) return null; const h = hp.slice(0, ci), p = +hp.slice(ci + 1); if (!h || !p || p < 1 || p > 65535) return null; const cu = cr.indexOf(':'); return { host: h, port: p, user: cu >= 0 ? cr.slice(0, cu) : '', pass: cu >= 0 ? cr.slice(cu + 1) : '' }; };
 const 過鬼 = async (w, r, t, { user, pass }, pl) => { const tp = new Uint8Array([t, 0, 0, 0]); await w.write(寄書(法天.AQ, 生辰(), [畫符(象地.TRANSPORT, tp)])); let [m, e] = await 閱符(r); if (!m) return null; let k = null, aa = []; const s = x => k ? 加印(x, k) : Promise.resolve(x); if (m.type === 法天.AE && user && 辨咎(m.attrs[象地.ERR]) === 401) { const rm = 解花.decode(m.attrs[象地.REALM] ?? new Uint8Array(0)), nc = m.attrs[象地.NONCE] ?? new Uint8Array(0); k = await 五印(`${user}:${rm}:${pass}`); aa = [畫符(象地.USER, 篆印.encode(user)), 畫符(象地.REALM, 篆印.encode(rm)), 畫符(象地.NONCE, nc)]; const aq = await 加印(寄書(法天.AQ, 生辰(), [畫符(象地.TRANSPORT, tp), ...aa]), k); const ex = pl ? await Promise.all(pl(aa, s)) : []; await w.write(ex.length ? 聚沙(aq, ...ex) : aq); [m, e] = await 閱符(r, e); if (!m) return null; } else if (pl && m.type === 法天.AO) { const ex = await Promise.all(pl(aa, s)); if (ex.length) await w.write(聚沙(...ex)); } return m.type === 法天.AO ? { key: k, aa, ex: e, sign: s } : null; };
-const 抽芽 = (h, p) => { const s = cfConnect({ hostname: h, port: p }); return s.opened.then(() => s); };
+const 抽芽 = (h, p) => { const s = cfConnect({ hostname: h, port: p }); return Promise.race([s.opened.then(() => s), new Promise((_, rej) => setTimeout(() => { try { s.close(); } catch {} rej(new Error('sprout_timeout')); }, 5000))]); };
 const 通鬼 = async (turn, tIp, tP) => {
-  let ctrl = null, data = null;
-  const cl = () => 落鎖(ctrl, data);
+  let ctrl = null, data = null, 門守望 = null, 心跳計 = null, 心跳筆 = null, 脈止 = false, 已淨 = false;
+  const 落錨 = () => 落鎖(ctrl, data);
+  const 封門 = () => {
+    if (已淨) return; 已淨 = true; 脈止 = true;
+    if (心跳計) { clearTimeout(心跳計); 心跳計 = null; }
+    try { 門守望?.cancel('tunnel_closed')?.catch?.(() => {}); } catch {}
+    try { 心跳筆?.releaseLock(); } catch {}
+    落錨(); 心跳筆 = null;
+  };
   try {
     ctrl = await 抽芽(turn.host, turn.port);
     const cw = ctrl.writable.getWriter(), cr = ctrl.readable.getReader(), peer = 畫符(象地.PEER, 幻影(tIp, tP)), auth = await 過鬼(cw, cr, 6, turn, (aa, s) => [s(寄書(法天.PQ, 生辰(), [peer, ...aa])), s(寄書(法天.CQ, 生辰(), [peer, ...aa]))]);
-    if (!auth) { try { cw.releaseLock(); } catch {} try { cr.releaseLock(); } catch {} cl(); return null; }
+    if (!auth) { try { cw.releaseLock(); } catch {} try { cr.releaseLock(); } catch {} 落錨(); return null; }
     const dS = cfConnect({ hostname: turn.host, port: turn.port }), { aa, sign } = auth;
     let ex = auth.ex, r;
-    [r, ex] = await 閱符(cr, ex); if (r?.type !== 法天.PO) { try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} cl(); return null; }
-    [r, ex] = await 閱符(cr, ex); if (r?.type !== 法天.CO || !r.attrs[象地.CONNID]) { try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} cl(); return null; }
-    try { await dS.opened; } catch (E) { 落鎖(dS); try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} cl(); return null; }
+    [r, ex] = await 閱符(cr, ex); if (r?.type !== 法天.PO) { try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} 落錨(); return null; }
+    [r, ex] = await 閱符(cr, ex); if (r?.type !== 法天.CO || !r.attrs[象地.CONNID]) { try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} 落錨(); return null; }
+    try { await dS.opened; } catch (E) { 落鎖(dS); try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} 落錨(); return null; }
     data = dS;
     const dw = data.writable.getWriter(), dr = data.readable.getReader();
     await dw.write(await sign(寄書(法天.BQ, 生辰(), [畫符(象地.CONNID, r.attrs[象地.CONNID]), ...aa])));
     let ex2; [r, ex2] = await 閱符(dr);
-    if (r?.type !== 法天.BO) { try{dw.releaseLock();}catch{} try{dr.releaseLock();}catch{} try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} cl(); return null; }
+    if (r?.type !== 法天.BO) { try{dw.releaseLock();}catch{} try{dr.releaseLock();}catch{} try{cr.releaseLock();}catch{} try{cw.releaseLock();}catch{} 落錨(); return null; }
     cr.releaseLock(); cw.releaseLock(); dw.releaseLock();
     try { dr.releaseLock(); } catch {}
-    let kad = false;
-    const oc = cl, ca = () => { kad = true; try { ctrlW.releaseLock(); } catch {} oc(); }, ctrlW = ctrl.writable.getWriter();
-    (async () => { try { const rd = ctrl.readable.getReader(); while (!(await rd.read()).done); } catch {} })();
-    (async () => { try { for (;;) { await new Promise(r => setTimeout(r, 27e4)); if (kad) break; await ctrlW.write(聚沙(await sign(寄書(法天.RQ, 生辰(), aa)), await sign(寄書(法天.PQ, 生辰(), [peer, ...aa])))); } } catch {} })();
-    return { readable: data.readable, writable: data.writable, close: ca, prefix: (ex2 && ex2.length) ? ex2.slice() : null };
-  } catch { cl(); return null; }
+    心跳筆 = ctrl.writable.getWriter();
+    門守望 = ctrl.readable.getReader();
+    (async () => {
+      try {
+        while (!脈止) { const rd = 門守望; if (!rd) break; const { done } = await rd.read(); if (done) break; }
+      } catch {}
+      try { if (門守望) 門守望.releaseLock(); } catch {}
+      門守望 = null;
+    })();
+    const 心跳一輪 = async () => {
+      if (脈止) return;
+      try {
+        await 心跳筆.write(聚沙(await sign(寄書(法天.RQ, 生辰(), aa)), await sign(寄書(法天.PQ, 生辰(), [peer, ...aa]))));
+      } catch { 封門(); return; }
+      if (!脈止) 心跳計 = setTimeout(心跳一輪, 27e4);
+    };
+    心跳計 = setTimeout(心跳一輪, 27e4);
+    return { readable: data.readable, writable: data.writable, close: 封門, prefix: (ex2 && ex2.length) ? ex2.slice() : null };
+  } catch { 封門(); return null; }
 };
 const 刻址 = h => { const s = h.replace(/^\[|\]$/g, ''), m = s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/); if (m) return new Uint8Array([0x01, ...m.slice(1).map(Number)]); if (s.includes(':')) { const b = new Uint8Array(17); b[0] = 0x03; 展脈(s).forEach((x, i) => { const v = parseInt(x || '0', 16); b[1 + i * 2] = v >> 8; b[2 + i * 2] = v & 0xff; }); return b; } const e = 篆印.encode(h); return 聚沙(new Uint8Array([0x02, e.length]), e); };
 const 解址 = d => { if (!d.length) return ['', 0]; if (d[0] <= 1) return d.length >= 5 ? [d.subarray(1, 5).join('.'), 5] : ['', 0]; if (d[0] === 2) return d.length >= 2 + d[1] ? [解花.decode(d.subarray(2, 2 + d[1])), 2 + d[1]] : ['', 0]; return d[0] === 3 && d.length >= 17 ? [`[${Array.from({ length: 8 }, (_, i) => 二爻(d, 1 + i * 2).toString(16)).join(':')}]`, 17] : ['', 0]; };
@@ -151,31 +171,46 @@ const 探首 = (buf, 帶玉) => {
   const c = buf[o + sL]; if (c === 3) return { isUDP: true, rawPayload: buf.subarray(o + sL + 1), isVless: true };
   o += sL; const aT = buf[o++]; if (aT !== 1) return null;
   const p = v.getUint16(o, false); o += 2; const k = buf[o++]; let a;
-  if (k === 1) { if (o + 4 > buf.byteLength) return null; a = `${buf[o]}.${buf[o + 1]}.${buf[o + 2]}.${buf[o + 3]}`; o += 4; }
+  if (k === 1) { if (o + 4 > buf.byteLength) return null; a = `${buf[o]}.${buf[o+1]}.${buf[o+2]}.${buf[o+3]}`; o += 4; }
   else if (k === 2) { if (o >= buf.byteLength) return null; const l = buf[o++]; if (o + l > buf.byteLength) return null; a = 解花.decode(buf.subarray(o, o + l)); o += l; }
   else if (k === 3) { if (o + 16 > buf.byteLength) return null; a = `[${六脈(buf.subarray(o, o + 16))}]`; o += 16; }
   else return null;
   return { address: a, port: p, rawPayload: buf.subarray(o), isUDP: false, isVless: true };
 };
-const 鵲橋 = async (r, w, sM) => { const rd = r.getReader({ mode: "byob" }); let b = new ArrayBuffer(65536); try { while (true) { const { done, value: 米 } = await rd.read(new Uint8Array(b)); if (done) break; w.send(米); b = 米.buffer; } } finally { rd.releaseLock(); } };
+const 鵲橋 = async (r, w, sM, 活躍) => { const rd = r.getReader({ mode: "byob" }); let b = new ArrayBuffer(65536); try { while (true) { const { done, value: 米 } = await rd.read(new Uint8Array(b)); if (done) break; w.send(米); if (活躍) 活躍(); b = 米.buffer; } } finally { rd.releaseLock(); } };
+const 限時寫 = (writer, data, timeoutMs = 寫限) => Promise.race([writer.write(data), new Promise((_, rej) => setTimeout(() => rej(new Error('write_timeout')), timeoutMs))]);
 const 馭龍 = async (ws, ip, req, cP, fList, 帶玉) => {
   ws.binaryType = "arraybuffer";
   let ts = null, tw = null, est = false, wt = Promise.resolve(), cl = false, uh = null;
-  const turn = 覓角(req.url), close = () => { if (cl) return; cl = true; try { uh?.close(); } catch {} try { tw?.releaseLock(); } catch {} try { ts?.close(); } catch {} try { ws.close(); } catch {} };
+  const turn = 覓角(req.url);
+  let 最近活躍 = Date.now();
+  const 活躍 = () => { 最近活躍 = Date.now(); };
+  let 看門狗 = null;
+  const close = () => {
+    if (cl) return; cl = true;
+    if (看門狗) { clearInterval(看門狗); 看門狗 = null; }
+    try { uh?.close(); } catch {} try { tw?.releaseLock(); } catch {} try { ts?.close(); } catch {} try { ws.close(); } catch {}
+  };
+  看門狗 = setInterval(() => {
+    if (cl) { clearInterval(看門狗); return; }
+    if (Date.now() - 最近活躍 > 犬判) close();
+  }, 犬巡);
   const pP = async p => {
     try {
+      活躍();
       if (uh) return uh.processXUDP(p);
-      if (tw) return tw.write(p);
+      if (tw) return await 限時寫(tw, p);
       const g = 探首(p, 帶玉); if (!g) return close();
       if (g.isVless) ws.send(new Uint8Array([p[0], 0]));
-      if (g.isUDP && turn) { uh = await 通流(turn, d => { try { ws.send(d); } catch {} }); if (!uh) return close(); const ud = g.rawPayload; ud.length && uh.processXUDP(ud); return; }
+      if (g.isUDP && turn) { uh = await 通流(turn, d => { try { ws.send(d); 活躍(); } catch {} }); if (!uh) return close(); const ud = g.rawPayload; ud.length && uh.processXUDP(ud); return; }
       let sM = false;
-      if (turn) { const ip = /^\d+\.\d+\.\d+\.\d+$/.test(g.address) ? g.address : (g.address.includes(':') ? g.address.replace(/^\[|\]$/g, '') : await 尋脈(g.address)); if (!ip) return close(); ts = await 通鬼(turn, ip, g.port); }
+      if (turn) { const tip = /^\d+\.\d+\.\d+\.\d+$/.test(g.address) ? g.address : (g.address.includes(':') ? g.address.replace(/^\[|\]$/g, '') : await 尋脈(g.address)); if (!tip) return close(); ts = await 通鬼(turn, tip, g.port); }
       else { sM = g.port === 443 || (g.rawPayload.byteLength > 0 && g.rawPayload[0] === 0x16); ts = await 雲帆(g.address, g.port, cP, fList); }
       if (!ts) return close();
       tw = ts.writable.getWriter(); est = true;
-      鵲橋(ts.readable, ws, sM).finally(close);
-      if (g.rawPayload.byteLength) await tw.write(g.rawPayload);
+      鵲橋(ts.readable, ws, sM, 活躍).finally(close);
+      if (ts.prefix && ts.prefix.byteLength) { try { ws.send(ts.prefix); } catch { return close(); } }
+      if (g.rawPayload.byteLength) await 限時寫(tw, g.rawPayload);
     } catch { close(); }
   };
   ws.addEventListener("message", e => { const 貨 = est ? e.data : new Uint8Array(e.data); wt = wt.then(() => pP(貨)).catch(close); });
@@ -215,7 +250,7 @@ const 探信 = (b, 帶玉) => {
   if (b[cO] !== 1) throw new Error("tcp only");
   const p = (b[cO + 1] << 8) | b[cO + 2]; if (p === 0) throw new Error("invalid port");
   const aT = b[cO + 3]; let o = cO + 4, h;
-  if (aT === 1) { if (b.byteLength < o + 4) return null; h = `${b[o]}.${b[o + 1]}.${b[o + 2]}.${b[o + 3]}`; o += 4; }
+  if (aT === 1) { if (b.byteLength < o + 4) return null; h = `${b[o]}.${b[o+1]}.${b[o+2]}.${b[o+3]}`; o += 4; }
   else if (aT === 2) { if (b.byteLength < o + 1) return null; const l = b[o++]; if (l === 0) throw new Error("empty domain"); if (b.byteLength < o + l) return null; h = 解花.decode(b.subarray(o, o + l)); o += l; }
   else if (aT === 3) { if (b.byteLength < o + 16) return null; const g = []; for (let i = 0; i < 8; i++) g.push(((b[o + i * 2] << 8) | b[o + i * 2 + 1]).toString(16)); h = g.join(":"); o += 16; }
   else throw new Error("invalid address type");
@@ -244,9 +279,9 @@ const 迎信 = async req => {
   let s;
   try {
     if (turn) {
-      const ip = /^\d+\.\d+\.\d+\.\d+$/.test(h.hostname) ? h.hostname : (h.hostname.includes(':') ? h.hostname.replace(/^\[|\]$/g, '') : await 尋脈(h.hostname));
-      if (!ip) return new Response("resolve failed", { status: 502 });
-      s = await 通鬼(turn, ip, h.port);
+      const tip = /^\d+\.\d+\.\d+\.\d+$/.test(h.hostname) ? h.hostname : (h.hostname.includes(':') ? h.hostname.replace(/^\[|\]$/g, '') : await 尋脈(h.hostname));
+      if (!tip) return new Response("resolve failed", { status: 502 });
+      s = await 通鬼(turn, tip, h.port);
       if (!s) return new Response("TURN tunnel failed", { status: 502 });
     } else {
       s = await 雲帆(h.hostname, h.port, cP, fList);
@@ -254,7 +289,7 @@ const 迎信 = async req => {
   } catch { try { await req.body.cancel(); } catch {} return new Response("bad gateway", { status: 502 }); }
   const ac = new AbortController(); let sC = false;
   const cl = r => { if (!ac.signal.aborted) { try { ac.abort(r); } catch {} } if (!sC) { sC = true; try { s.close(); } catch {} } };
-  const uP = (async () => { const w = s.writable.getWriter(); try { if (h.initialPayload.byteLength) await w.write(h.initialPayload); } finally { w.releaseLock(); } await req.body.pipeTo(s.writable, { signal: ac.signal }); })();
+  const uP = (async () => { const w = s.writable.getWriter(); try { if (h.initialPayload.byteLength) await 限時寫(w, h.initialPayload); } finally { w.releaseLock(); } await req.body.pipeTo(s.writable, { signal: ac.signal }); })();
   const rS = new IdentityTransformStream();
   const dP = (async () => {
     const w = rS.writable.getWriter();
@@ -270,7 +305,7 @@ const 迎信 = async req => {
 };
 export default {
   async fetch(req) {
-    if (req.url.includes('__ping')) return new Response("SINGLE-FINAL-V1", { status: 200 });
+    if (req.url.includes('__ping')) return new Response("SINGLE-V3-C", { status: 200 });
     if (!decodeURIComponent(req.url).includes(玉衡令)) return new Response("Forbidden", { status: 403 });
     const isWS = req.headers.get("Upgrade")?.toLowerCase() === "websocket", isX = req.method === "POST" && req.body;
     if (isWS) return await 迎客(req);
