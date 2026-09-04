@@ -177,7 +177,7 @@ const 探首 = (buf, 帶玉) => {
   else return null;
   return { address: a, port: p, rawPayload: buf.subarray(o), isUDP: false, isVless: true };
 };
-const 鵲橋 = async (r, w, sM, 活躍) => { const rd = r.getReader({ mode: "byob" }); let b = new ArrayBuffer(65536); try { while (true) { const { done, value: 米 } = await rd.read(new Uint8Array(b)); if (done) break; w.send(米); if (活躍) 活躍(); b = 米.buffer; } } finally { rd.releaseLock(); } };
+const 鵲橋 = async (r, w, sM, 活躍) => { const rd = r.getReader({ mode: "byob" }); let b = new ArrayBuffer(58888); try { while (true) { const { done, value: 米 } = await rd.read(new Uint8Array(b)); if (done) break; w.send(米); if (活躍) 活躍(); b = 米.buffer; } } finally { rd.releaseLock(); } };
 const 限時寫 = (writer, data, timeoutMs = 寫限) => Promise.race([writer.write(data), new Promise((_, rej) => setTimeout(() => rej(new Error('write_timeout')), timeoutMs))]);
 const 馭龍 = async (ws, ip, req, cP, fList, 帶玉) => {
   ws.binaryType = "arraybuffer";
@@ -217,15 +217,49 @@ const 馭龍 = async (ws, ip, req, cP, fList, 帶玉) => {
   ws.addEventListener("close", close); ws.addEventListener("error", close);
   if (ip) wt = pP(ip).catch(close);
 };
-const 解印 = v => { const n = v.replace(/-/g, "+").replace(/_/g, "/"), r = n.length % 4, b = atob(r ? n + "=".repeat(4 - r) : n), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+const 解印 = v => {
+  try {
+    const n = v.replace(/-/g, "+").replace(/_/g, "/").replace(/\s/g, "");
+    const r = n.length % 4;
+    const b = atob(r ? n + "=".repeat(4 - r) : n);
+    const u = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+    return u;
+  } catch {
+    return null;
+  }
+};
 const 迎客 = async req => {
   const rP = 尋蹤(req.url), rPr = rP ? await 索途(rP) : "", cP = 析衢(rPr);
   const fList = 列星(req).map(ip => 析衢(ip)).filter(Boolean);
   const 帶玉 = decodeURIComponent(req.url).includes(玉衡令), pH = req.headers.get("sec-websocket-protocol");
   let iPL = null;
-  if (pH) { try { iPL = 解印(pH); } catch { return new Response("Bad WebSocket protocol.", { status: 400 }); } }
-  const pr = new WebSocketPair(), [cW, sW] = Object.values(pr); sW.accept();
-  馭龍(sW, iPL, req, cP, fList, 帶玉);
+  if (pH) {
+    iPL = 解印(pH);
+  }
+  let pr = null;
+  try {
+    pr = new WebSocketPair();
+  } catch (e) {
+    return new Response("WebSocket setup failed", { status: 500 });
+  }
+  const cW = pr[0];
+  const sW = pr[1];
+  let accepted = false;
+  try {
+    sW.accept();
+    accepted = true;
+  } catch (e) {
+    try { cW.close(); } catch {}
+    return new Response("WebSocket accept failed", { status: 502 });
+  }
+  if (req.signal && req.signal.aborted) {
+    try { sW.close(1000, "Client disconnected before upgrade"); } catch {}
+    return new Response("Client disconnected", { status: 499 });
+  }
+  if (accepted) {
+    馭龍(sW, iPL, req, cP, fList, 帶玉);
+  }
   return new Response(null, { status: 101, webSocket: cW, headers: pH ? { "Sec-WebSocket-Protocol": pH } : undefined });
 };
 const 首限 = 8192, 空缽 = new Uint8Array(0), 合缽 = (l, r) => { const m = new Uint8Array(l.byteLength + r.byteLength); m.set(l); m.set(r, l.byteLength); return m; }, 辨玉 = b => { const u = 玉衡令.replace(/-/g, ""); for (let i = 0; i < 16; i++) if (b[i + 1] !== parseInt(u.slice(i * 2, i * 2 + 2), 16)) return false; return true; };
@@ -301,13 +335,15 @@ const 迎信 = async req => {
     await s.readable.pipeTo(rS.writable, { signal: ac.signal });
   })();
   void uP.catch(cl); void dP.then(() => cl(), cl); void Promise.allSettled([uP, dP]);
-  return new Response(rS.readable, { status: 200, headers: { "Content-Type": "application/octet-stream", "Cache-Control": "no-store", "X-Accel-Buffering": "no" } });
+  return new Response(rS.readable, { status: 200, headers: { "Content-Type": "application/octet-stream", "grpc-status": "0", "Cache-Control": "no-store", "X-Accel-Buffering": "no" } });
 };
 export default {
   async fetch(req) {
-    if (req.url.includes('__ping')) return new Response("SINGLE-V3-C", { status: 200 });
+    if (req.url.includes('__ping')) return new Response("SINGLE-V4", { status: 200 });
     if (!decodeURIComponent(req.url).includes(玉衡令)) return new Response("Forbidden", { status: 403 });
-    const isWS = req.headers.get("Upgrade")?.toLowerCase() === "websocket", isX = req.method === "POST" && req.body;
+    const rawUpgrade = req.headers.get("Upgrade");
+    const isWS = rawUpgrade !== null && rawUpgrade.toLowerCase() === "websocket";
+    const isX = req.method === "POST" && req.body;
     if (isWS) return await 迎客(req);
     if (isX) return await 迎信(req);
     return new Response("Not Found", { status: 404 });
